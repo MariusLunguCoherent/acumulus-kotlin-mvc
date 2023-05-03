@@ -21,16 +21,13 @@ class ToppingsService(
 
     @Transactional
     fun registerUser(newUserAndToppings: RegisterUsedAndToppingsDTO): UserAccount {
-        val existigToppings = mutableSetOf<Toppings>()
-        for (topping in newUserAndToppings.toppingsPrefered) {
-            var toppingValue = toppingsRepository.findAllByToppingContains(topping)
-            if (toppingValue != null)
-                existigToppings.add(toppingValue)
-        }
-        newUserAndToppings.toppingsPrefered.removeAll(existigToppings as Collection<*>)
+        var toppingsInDb = toppingsRepository.findAllToppingsByValue(newUserAndToppings.toppingsPrefered)
 
+        toppingsInDb.stream().forEach { topping -> newUserAndToppings.toppingsPrefered.remove(topping.topping) }
+
+        //   newUserAndToppings.toppingsPrefered.removeAll(toppingsInDb as Collection<*>)
         val userDataEntity = MapDtoToEntity.mapDtoToEntity(userDto = newUserAndToppings)
-        MapDtoToEntity.updateDtoToppingsWithExistingOnes(userDataEntity, existigToppings)
+        MapDtoToEntity.updateDtoToppingsWithExistingOnes(userDataEntity, toppingsInDb)
         return userAccountRepository.save(userDataEntity)
     }
 
@@ -49,6 +46,16 @@ class ToppingsService(
         for (userAccount in listOfUniqueUsers)
             uniqueUsers.add(MapDtoToEntity.mapUserAccountEntityToUserAccountDto(userAccount))
         return uniqueUsers
+    }
+
+
+    fun testGetDistinctUsers(topping: String): Long {
+        val idTopping = toppingsRepository.findByToppingValue(topping)
+        println("idTopping found : $idTopping")
+        val idUser = toppingsRepository.findUserDistinctById(idTopping)
+        print("idUser : $idUser")
+        return idUser
+
     }
 
     @Transactional
@@ -75,10 +82,10 @@ class ToppingsService(
     @Throws(UserNotFoundException::class)
     fun getUserTopping(userId: Long): RegisterUsedAndToppingsDTO {
         // val userAccount = toppingsRepository.findUserEntityByEmail(userId)
-       lateinit  var userAccount: UserAccount
-        try{
+        lateinit var userAccount: UserAccount
+        try {
             userAccount = userAccountRepository.findUserAccountById(userId)
-        }catch (e: EmptyResultDataAccessException){
+        } catch (e: EmptyResultDataAccessException) {
             throw UserNotFoundException("User is not in database")
         }
 

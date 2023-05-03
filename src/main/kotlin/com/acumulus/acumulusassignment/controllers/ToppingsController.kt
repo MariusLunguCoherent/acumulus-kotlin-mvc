@@ -61,4 +61,9 @@ class ToppingsController(val service: ToppingsService) {
         return ResponseEntity.status(HttpStatus.valueOf(200)).body(distinctUsers)
     }
 
+    @GetMapping("/api/v1/testDistinctUsers")
+    fun testGetUniqueUsers(@RequestParam (name ="topping") topping: String): Long {
+        return service.testGetDistinctUsers(topping)
+    }
+
 }
