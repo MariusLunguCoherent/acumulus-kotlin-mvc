@@ -56,14 +56,14 @@ class ToppingsController(val service: ToppingsService) {
             required = true,
             defaultValue = "Mozzarella"
         ) topping: String
-    ): ResponseEntity<List<String>> {
-        val distinctUsers = (service.getDistinctUsers(topping)).map { user -> user.mapDtoToJson() }
+    ): ResponseEntity<Long> {
+        val distinctUsers = service.countDistinctUsers(topping)
         return ResponseEntity.status(HttpStatus.valueOf(200)).body(distinctUsers)
     }
 
     @GetMapping("/api/v1/testDistinctUsers")
     fun testGetUniqueUsers(@RequestParam (name ="topping") topping: String): Long {
-        return service.testGetDistinctUsers(topping)
+        return service.countDistinctUsers(topping)
     }
 
 }

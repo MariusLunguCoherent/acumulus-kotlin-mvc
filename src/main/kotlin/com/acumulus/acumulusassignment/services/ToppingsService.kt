@@ -49,7 +49,7 @@ class ToppingsService(
     }
 
 
-    fun testGetDistinctUsers(topping: String): Long {
+    fun countDistinctUsers(topping: String): Long {
         val idTopping = toppingsRepository.findByToppingValue(topping)
         println("idTopping found : $idTopping")
         val idUser = toppingsRepository.findUserDistinctById(idTopping)
